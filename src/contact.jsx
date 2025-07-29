@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import './Contacts.css';
 
 const Contacts = () => {
   const [contacts, setContacts] = useState([]);
@@ -11,8 +12,8 @@ const Contacts = () => {
     const fetchContacts = async () => {
       try {
         const response = await axios.get('http://localhost:5000/contacts');
-        console.log('GET response:', response.data); // Debug response
-        setContacts(response.data); // Adjust based on server response
+        console.log('GET response:', response.data);
+        setContacts(response.data);
       } catch (error) {
         setError('Failed to fetch contacts');
       }
@@ -20,7 +21,6 @@ const Contacts = () => {
     fetchContacts();
   }, []);
 
-  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -35,19 +35,19 @@ const Contacts = () => {
     }
   };
 
-  // Create or update
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editId) {
         const response = await axios.put(`http://localhost:5000/contacts/${editId}`, formData);
-        console.log('PUT response:', response.data); // Debug response
+        console.log('PUT response:', response.data);
         setContacts(contacts.map((contact) => (contact._id === editId ? response.data : contact)));
         setEditId(null);
       } else {
         const response = await axios.post('http://localhost:5000/contacts', formData);
-        console.log('POST response:', response.data); // Debug response
+        console.log('POST response:', response.data);
         setContacts([...contacts, response.data]);
+        window.location.reload(); // Refresh page after adding contact
       }
       setFormData({ name: '', email: '', phone: '', message: '' });
       setError('');
@@ -62,35 +62,37 @@ const Contacts = () => {
   };
 
   return (
-    <div>
+    <div className="contacts-container">
       <h1>Contacts Management</h1>
-      <div>Add Contact</div>
+      <div className="form-title">Add Contact</div>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit} className="form">
-        <div>
+      <form onSubmit={handleSubmit} className="contact-form">
+        <div className="form-group">
           <label>Name:</label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} />
+          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label>Email:</label>
-          <input type="email" name="email" value={formData.email} onChange={handleChange} />
+          <input type="email" name="email" value={formData.email} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label>Phone:</label>
           <input type="text" name="phone" value={formData.phone} onChange={handleChange} />
         </div>
-        <div>
+        <div className="form-group">
           <label>Message:</label>
           <input type="text" name="message" value={formData.message} onChange={handleChange} />
         </div>
-        <button type="submit">{editId ? 'Update Contact' : 'Add Contact'}</button>
+        <button type="submit" className="submit-btn">
+          {editId ? 'Update Contact' : 'Add Contact'}
+        </button>
       </form>
 
       <h3>Contact List</h3>
       {contacts.length === 0 ? (
         <p>No contacts found</p>
       ) : (
-        <table>
+        <table className="contacts-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -110,8 +112,8 @@ const Contacts = () => {
                   <td>{contact.phone}</td>
                   <td>{contact.message}</td>
                   <td>
-                    <button onClick={() => handleEdit(contact)}>Edit</button>
-                    <button onClick={() => deleteContact(contact._id)}>Delete</button>
+                    <button className="edit-btn" onClick={() => handleEdit(contact)}>Edit</button>
+                    <button className="delete-btn" onClick={() => deleteContact(contact._id)}>Delete</button>
                   </td>
                 </tr>
               ))}
